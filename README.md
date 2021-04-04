@@ -10,6 +10,18 @@ This implementation is based on the [reference implementation](https://github.co
 shipped with the official definition of the standard
 and the [rust-il2-ilint](https://github.com/interlockledger/rust-il2-ilint).
 
+## Installation
+
+To install this library, you may download the code from 
+[github](https://github.com/interlockledger/pyilint) and copy
+the contents of the directory ``src`` into your module's directory.
+
+You can also use **pip** to install it by running the command:
+
+```
+$ pip install pyilint
+```
+
 ## Requirements
 
 This program was developed for Python 3.8 or higher (it may work on older versions). No
