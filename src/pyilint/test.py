@@ -54,6 +54,25 @@ SAMPLE_VALUES = [
     SampleILInt(0x123456789ABCEE7, 'FF0123456789ABCDEF'),
     SampleILInt(0xFFFFFFFFFFFFFFFF, 'FFFFFFFFFFFFFFFF07')]
 
+BAD_ENCODINGS = [
+    bytes.fromhex('F90000'),
+    bytes.fromhex('FA000000'),
+    bytes.fromhex(
+        'FB00000000'),
+    bytes.fromhex(
+        'FC0000000000'),
+    bytes.fromhex(
+        'FD000000000000'),
+    bytes.fromhex(
+        'FE00000000000000'),
+    bytes.fromhex(
+        'FF0000000000000000'),
+    bytes.fromhex(
+        'FFFFFFFFFFFFFFFF08'),
+    bytes.fromhex(
+        'FFFFFFFFFFFFFFFFFF'),
+]
+
 
 class TestILInt(unittest.TestCase):
 
@@ -184,8 +203,8 @@ class TestILInt(unittest.TestCase):
             buff = bytearray(s.encoded[:-1])
             self.assertRaises(ValueError, ilint_decode, buff)
 
-        self.assertRaises(ValueError, ilint_decode,
-                          bytes.fromhex('FFFFFFFFFFFFFFFF08'))
+        for bad in BAD_ENCODINGS:
+            self.assertRaises(ValueError, ilint_decode, bad)
 
     def test_ilint_decode_from_stream(self):
 
@@ -205,8 +224,9 @@ class TestILInt(unittest.TestCase):
             inp = io.BytesIO(s.encoded[:-1])
             self.assertRaises(ValueError, ilint_decode_from_stream, inp)
 
-        self.assertRaises(ValueError, ilint_decode_from_stream,
-                          io.BytesIO(bytes.fromhex('FFFFFFFFFFFFFFFF08')))
+        for bad in BAD_ENCODINGS:
+            self.assertRaises(ValueError, ilint_decode_from_stream,
+                              io.BytesIO(bad))
 
     def test_ilint_encode_decode(self):
 

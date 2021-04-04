@@ -148,6 +148,8 @@ def ilint_encode_to_stream(v: int, outp: io.IOBase) -> int:
 def _ilint_decode_core(header: int, size: int, body: bytes) -> Tuple[int, int]:
     if len(body) != size - 1:
         raise ValueError('Premature end of ILInt')
+    if len(body) > 1 and body[0] == 0:
+        raise ValueError('Invalid ILInt encoding.')
     v = 0
     for b in body:
         v = (v << 8) + b
