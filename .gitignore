@@ -130,3 +130,6 @@ dmypy.json
 
 # Ignore vitualenv
 .env
+
+# Ignore the VS Code files.
+.vscode
