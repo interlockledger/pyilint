@@ -248,3 +248,30 @@ class TestILInt(unittest.TestCase):
             dec, dec_size = ilint_decode_from_stream(stream)
             self.assertEqual(ilint_size(v), dec_size)
             self.assertEqual(v, dec)
+
+    def test_ilint_decode_multibyte_core(self):
+
+        for s in SAMPLE_VALUES[1:]:
+            if len(s.encoded) > 1:
+                header = s.encoded[0]
+                size = ilint_size_from_header(header)
+                body = s.encoded[1:]
+                value, dec_size = ilint_decode_multibyte_core(
+                    header, size, body)
+                self.assertEqual(s.value, value)
+                self.assertEqual(size, dec_size)
+
+        for s in SAMPLE_VALUES[1:]:
+            if len(s.encoded) > 1:
+                header = s.encoded[0]
+                size = ilint_size_from_header(header)
+                body = s.encoded[1:-1]
+                self.assertRaises(ValueError, ilint_decode_multibyte_core,
+                                  header, size, body)
+
+        for bad in BAD_ENCODINGS:
+            header = bad[0]
+            size = ilint_size_from_header(header)
+            body = bad[1:]
+            self.assertRaises(ValueError, ilint_decode_multibyte_core,
+                              header, size, body)

@@ -121,10 +121,7 @@ def ilint_encode(v: int, buff: bytearray) -> int:
     else:
         buff.append(ILINT_BASE + (size - 2))
         v = v - ILINT_BASE
-        shift = 8 * (size - 1)
-        while shift > 0:
-            shift -= 8
-            buff.append((v >> shift) & 0xFF)
+        buff += v.to_bytes(size - 1, byteorder='big', signed=False)
     return size
 
 
@@ -145,14 +142,41 @@ def ilint_encode_to_stream(v: int, outp: io.IOBase) -> int:
     return size
 
 
-def _ilint_decode_core(header: int, size: int, body: bytes) -> Tuple[int, int]:
+def ilint_decode_multibyte_core(header: int, size: int, body: bytes) -> Tuple[int, int]:
+    """
+    Decodes the **ILInt** from the triplet header, size and body. It is a low
+    level operation that takes the header, the size of the **ILInt** and the 
+    **ILInt** data without the header and decodes it. 
+
+    It was exposed in order to allow fast implementation of decoders under special
+    conditions. For this reason, this function has the following restrictions:
+
+    - `size` must be 2 to 9;
+    - The value of `size` must be the result of `ilint_size_from_header(header)` but
+      it is not verified inside this function;
+
+    Any attempt to call this method with parameters that don't match the previous
+    restrictions will result in an undefined behavior. Thus, if you are not sure
+    why this method exists, prefer `ilint_decode()` or 
+    `ilint_decode_from_stream()` instead.
+
+    It may raise `ValueError` if the **ILInt** data is invalid.
+
+    Parameters:
+    - `header`: The byte that is the header of the **ILInt**;
+    - `size`: The expected size of the ILInt in bytes;
+    - `body`: The rest of the **ILInt** data without the header;
+
+    Retunrs:
+    - A tuple with the value read and the number of bytes used.
+
+    New since version 0.2.0.
+    """
     if len(body) != size - 1:
         raise ValueError('Premature end of ILInt')
     if len(body) > 1 and body[0] == 0:
         raise ValueError('Invalid ILInt encoding.')
-    v = 0
-    for b in body:
-        v = (v << 8) + b
+    v = int.from_bytes(body, byteorder='big', signed=False)
     v += ILINT_BASE
     if v > MAX_UINT64:
         raise ValueError('ILInt overflow.')
@@ -161,7 +185,7 @@ def _ilint_decode_core(header: int, size: int, body: bytes) -> Tuple[int, int]:
 
 def ilint_decode(buff: bytes) -> Tuple[int, int]:
     """
-    Decodes the **ILInt** stored on the Reads a `ILInt` value from the buffer. It may raise a `ValueError`
+    Decodes the **ILInt** from a buffer of bytes. It may raise a `ValueError`
     if the format cannot be read.
 
     Retunrs:
@@ -174,7 +198,7 @@ def ilint_decode(buff: bytes) -> Tuple[int, int]:
         return (header, 1)
     else:
         size = ilint_size_from_header(header)
-        return _ilint_decode_core(header, size, buff[1:size])
+        return ilint_decode_multibyte_core(header, size, buff[1:size])
 
 
 def ilint_decode_from_stream(inp: io.IOBase) -> Tuple[int, int]:
@@ -194,4 +218,4 @@ def ilint_decode_from_stream(inp: io.IOBase) -> Tuple[int, int]:
     else:
         size = ilint_size_from_header(header)
         body = inp.read(size - 1)
-        return _ilint_decode_core(header, size, body)
+        return ilint_decode_multibyte_core(header, size, body)
