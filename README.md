@@ -50,3 +50,13 @@ unit-tests.
 ## License
 
 This program is licensed under the BSD 3-Clause License.
+
+## Changes
+
+- 0.2.1:
+    - Unit-tests removed from the distribution package;
+- 0.2.0:
+    - Replacing bitwise operations by `int.to_bytes()` and `int.from_bytes()`;
+    - Exposing the low level function `ilint_decode_multibyte_core()`;
+- 0.1.1:
+    - Initial public release;
