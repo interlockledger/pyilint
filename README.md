@@ -12,7 +12,7 @@ and the [rust-il2-ilint](https://github.com/interlockledger/rust-il2-ilint).
 
 ## Requirements
 
-This program was developed for Python 3.8 or higher (it may work on older versions). No
+This program was developed for Python 3.6 or higher. No
 external dependencies are required.
 
 ## Installation
@@ -53,6 +53,8 @@ This program is licensed under the BSD 3-Clause License.
 
 ## Changes
 
+- 0.2.2:
+    - Tested on multiple versions of python with tox;
 - 0.2.1:
     - Unit-tests removed from the distribution package;
 - 0.2.0:
